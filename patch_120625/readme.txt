@@ -5,7 +5,7 @@
 1.概要
 次のMODXの脆弱性を修正するパッチです。
 
-  MODX 1.0.6J
+  MODX 1.0.5J-r11
 
 2.修正内容
 
@@ -18,8 +18,6 @@ srcフォルダ以下のファイルをmodxインストール先の同名ファ�
 
 4.修正対象ソース
 
- [MODXインストール先]/action.php
- [MODXインストール先]/index-ajax.php
  [MODXインストール先]/manager/includes/mutate_settings.ajax.php
 
 5.更新情報
