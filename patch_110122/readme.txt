@@ -8,6 +8,9 @@ MODx1.0.5Jより以前のバージョンに発見された脆弱性を修正す�
 
 2.修正内容
 
+ ・[#2787] fix XSS vuln. in image editor
+   対象MODxバージョン：1.0.4J-r2 〜 1.0.0J
+
  ・[#3437] fix vulnerability in AjaxSearch allowing attacker to view arbitrary files (JVN#95385972)
    対象MODxバージョン：1.0.4J-r5 〜 1.0.3Jr2
 
@@ -20,6 +23,7 @@ srcフォルダ以下のファイルをmodxインストール先の同名フォ�
 
 4.修正対象ソース
 
+ [modxインストール先]/manager/media/ImageEditor/editor.php
  [modxインストール先]/assets/snippets/ajaxSearch/classes/ajaxSearchOutput.class.inc.php
  [modxインストール先]/assets/snippets/ajaxSearch/classes/asPhxParser.class.inc.php
 
