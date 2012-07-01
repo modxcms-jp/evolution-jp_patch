@@ -1,5 +1,5 @@
 <?php
-# eForm 1.4.4.7 - Electronic Form Snippet
+# eForm 1.4.4.6 - Electronic Form Snippet
 # Original created by: Raymond Irving 15-Dec-2004.
 # Extended by: Jelle Jager (TobyL) September 2006
 # -----------------------------------------------------
@@ -35,8 +35,6 @@
 # bugfix: Auto respond email didn't honour the &sendAsText parameter
 # bugfix: The #FUNCTION validation rule for select boxes never calls the function
 # bugfix: Validation css class isn't being added to labels.
-#
-# SECURITY FIX: add additional sanitization to fields after stripping slashes to avoid remote tag execution
 ##
 
 #----------------------------------------------------------
@@ -112,8 +110,7 @@ $params = array (
    'requiredClass' => isset($requiredClass)?$requiredClass:"required",
    'invalidClass' => isset($invalidClass)?$invalidClass:"invalid",
    'runSnippet' => ( isset($runSnippet) && !is_numeric($runSnippet) )?$runSnippet:'',
-   'autoSenderName' => isset($autoSenderName)?$autoSenderName:'',
-   'version' => isset($version) ? $version : '1.4.2'
+   'autoSenderName' => isset($autoSenderName)?$autoSenderName:''
 );
 
 // pixelchutes PHx workaround
@@ -131,6 +128,9 @@ $_dfnMaxlength = 6;
 
 	extract($params,EXTR_SKIP); // extract params into variables
 
+	$fileVersion = '1.4.4.7';
+	$version = isset($version) ? $version : 'prior to 1.4.2';
+
 	#include default language file
 	include_once($snipPath."lang/english.inc.php");
 
@@ -143,11 +143,12 @@ $_dfnMaxlength = 6;
 			if( $isDebug ) $debugText .= "<strong>Language file '{$form_language}.inc.php' not found!</strong><br />"; //always in english!
 	}
 
-	//check version differences
-	if(version_compare($version, '1.4.4.7', '<')) return $_lang['ef_version_error'];
-	
 	# add debug warning - moved again...
 	if( $isDebug ) $debugText .= $_lang['ef_debug_warning'];
+
+	//check version differences
+	if( $version != $fileVersion )
+		return $_lang['ef_version_error'];
 
 	# check for valid form key - moved to below fetching form template to allow id coming from form template
 
@@ -172,7 +173,7 @@ $_dfnMaxlength = 6;
 	//check for <input type='hidden name='formid'...>
 	if( !preg_match('/<input[^>]*?name=[\'"]formid[\'"]/i',$tpl) ){
 			//insert hidden formid field
-			$tpl = str_replace('</form>',"<input type=\"hidden\" name=\"formid\" value=\"$formid\" /></form>",$tpl);
+			$tpl = str_replace('</form>',"<input type=\"hidden\" name=\"formid\" value=\"$form_id\" /></form>",$tpl);
 	}
 
 	$validFormId = (isset($_POST['formid']) && $formid==$_POST['formid'])?1:0;
@@ -242,12 +243,12 @@ $tpl = eFormParseTemplate($tpl,$isDebug);
 				$fields[$name] = array_filter($value,create_function('$v','return (!empty($v));'));
 			} else {
 				$value = htmlspecialchars($value, ENT_QUOTES, $modx->config['modx_charset']);
-                if ($allowhtml || $formats[$name][2]=='html') {
-                    $fields[$name] = stripslashes($value);
-                } else {
-                    $fields[$name] = strip_tags(stripslashes($value));
-                }
-            }
+				if ($allowhtml || $formats[$name][2]=='html') {
+					$fields[$name] = stripslashes($value);
+				} else {
+					$fields[$name] = strip_tags(stripslashes($value));
+				}
+			}
 		}
 
 		# get uploaded files
@@ -264,9 +265,6 @@ $tpl = eFormParseTemplate($tpl,$isDebug);
 				$rClass['vericode']=$invalidClass; //added in 1.4.4
 			}
 		}
-
-        # sanitize the values with slashes stripped to avoid remote execution of Snippets
-        modx_sanitize_gpc($fields);
 
 		# validate fields
 		foreach($fields as $name => $value) {
@@ -668,7 +666,7 @@ $debugText .= 'Locale<pre>'.var_export($localeInfo,true).'</pre>';
 	// set vericode
 	if($vericode) {
 		$_SESSION['eForm.VeriCode'] = $fields['vericode'] = substr(uniqid(''),-5);
-		$fields['verimageurl'] = $modx->config['base_url'].'action.php?include=manager/media/captcha/veriword.php&rand='.mt_rand();
+		$fields['verimageurl'] = $modx->config['base_url'].'action.php?include=manager/includes/veriword.php&rand='.mt_rand();
 	}
 
 	# get SESSION data - thanks to sottwell
