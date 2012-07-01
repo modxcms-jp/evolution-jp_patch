@@ -1057,28 +1057,15 @@ function filterEformValue($value,$param){
 
 	function efLoadTemplate($key){
 		global $modx;
-		
-		if(substr($key, 0, 5) == '@FILE')
-		{
-			$path = substr($tpl, 6);
-			$path = trim($path);
-			$path = ltrim($path,'/');
-			$path = MODX_BASE_PATH . $path;
-			$tpl = file_get_contents($path);
-		}
-		elseif(substr($key, 0, 5) == '@CODE')
-		{
-			$tpl = substr($key, 6);
-		}
-		elseif( is_numeric($key) )
-		{ //get from document id
+		if( strlen($key)>50 ) return $key;
+		$tpl = false;
+		if( is_numeric($key) ) { //get from document id
 			//try unpublished docs first
 			$tpl = ( $doc=$modx->getDocument($key,'content',0) )? $doc['content'] :false;
 			if(!$tpl )
 				$tpl = ( $doc=$modx->getDocument($key,'content',1) )? $doc['content'] : false;
-		}
-		elseif($key)
-		{
+
+		}elseif( $key ){
 			$tpl = ( $doc=$modx->getChunk($key) )? $doc : false;
 			//try snippet if chunk is not found
             if(!$tpl) $tpl = ( $doc=$modx->runSnippet($key) )? $doc : false;
